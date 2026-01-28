@@ -1,0 +1,73 @@
+﻿:root {
+  font-family: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif;
+  color: #101018;
+  background: radial-gradient(circle at top, #f7f1ff 0%, #f8f4e6 35%, #e6f6ff 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 48px 20px;
+}
+
+.hero {
+  max-width: 720px;
+  padding: 48px 40px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 30px 80px rgba(20, 10, 50, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: #5b4a7f;
+  margin: 0 0 12px;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin: 0 0 16px;
+}
+
+.lede {
+  margin: 0 0 24px;
+  line-height: 1.6;
+  color: #2b2b36;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #101018;
+  color: #f8f4e6;
+  font-size: 0.95rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6ee7b7;
+  box-shadow: 0 0 12px rgba(110, 231, 183, 0.9);
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 32px 24px;
+  }
+}

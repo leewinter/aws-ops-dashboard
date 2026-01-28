@@ -1,0 +1,15 @@
+{
+  "name": "hono-magic-link",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api -c green,blue \"npm:dev -w apps/web\" \"npm:dev -w apps/api\"",
+    "build": "npm -w apps/web run build && npm -w apps/api run build",
+    "start": "npm -w apps/api run start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
