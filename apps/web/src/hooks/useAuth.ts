@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 type User = { email: string } | null
 
@@ -17,9 +17,15 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false)
   const verifyStarted = useRef(false)
 
-  const url = useMemo(() => new URL(window.location.href), [])
-  const token = url.searchParams.get('token')
-  const isMagic = url.pathname === '/magic' && Boolean(token)
+  const [isMagic, setIsMagic] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    const tokenValue = url.searchParams.get('token')
+    setToken(tokenValue)
+    setIsMagic(url.pathname === '/magic' && Boolean(tokenValue))
+  }, [])
 
   useEffect(() => {
     fetchJson<{ user: User }>('/api/me')
@@ -40,6 +46,7 @@ export function useAuth() {
           setUser(data.user)
           setStatus('Signed in. You can close this tab.')
           window.history.replaceState({}, '', '/')
+          setIsMagic(false)
         } else {
           setStatus('That link is invalid or expired.')
         }

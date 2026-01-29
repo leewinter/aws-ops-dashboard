@@ -1,5 +1,7 @@
+﻿import AppContentPlaceholder from './components/AppContentPlaceholder'
+import AppShell from './components/AppShell'
 import AuthForm from './components/AuthForm'
-import SignedInPanel from './components/SignedInPanel'
+import AuthHero from './components/AuthHero'
 import VerifyPanel from './components/VerifyPanel'
 import { useAuth } from './hooks/useAuth'
 
@@ -15,24 +17,25 @@ export default function App() {
     logout
   } = useAuth()
 
+  if (user && !isMagic) {
+    return (
+      <div className="page page-full">
+        <AppShell
+          userEmail={user.email}
+          isLoading={isLoading}
+          onSignOut={logout}
+        >
+          <AppContentPlaceholder />
+        </AppShell>
+      </div>
+    )
+  }
+
   return (
     <div className="page">
-      <header className="hero">
-        <p className="eyebrow">Magic Link Auth</p>
-        <h1>Email-only sign in for Hono + React.</h1>
-        <p className="lede">
-          Enter your email to receive a one-time link. In dev, check your server
-          logs for the magic link unless SMTP is configured.
-        </p>
-
+      <AuthHero>
         {isMagic ? (
           <VerifyPanel isLoading={isLoading} status={status} />
-        ) : user ? (
-          <SignedInPanel
-            email={user.email}
-            isLoading={isLoading}
-            onSignOut={logout}
-          />
         ) : (
           <AuthForm
             email={email}
@@ -42,7 +45,7 @@ export default function App() {
             onSubmit={requestLink}
           />
         )}
-      </header>
+      </AuthHero>
     </div>
   )
 }

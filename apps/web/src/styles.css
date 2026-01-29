@@ -19,8 +19,17 @@ body {
   padding: 48px 20px;
 }
 
+.page-full {
+  place-items: stretch;
+  padding: 0;
+}
+
+.page-full .app-layout {
+  min-height: 100vh;
+}
+
 .hero {
-  max-width: 720px;
+  max-width: 960px;
   padding: 48px 40px;
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.85);
@@ -96,8 +105,48 @@ h1 {
   color: #3a3260;
 }
 
+.app-layout {
+  margin-top: 24px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f8f4e6;
+}
+
+.app-logo {
+  height: 32px;
+  margin: 16px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 16px;
+}
+
+.app-content-placeholder h2 {
+  margin: 0 0 8px;
+}
+
+.app-content-placeholder p {
+  margin: 0;
+  color: #4b4558;
+}
+
 @media (max-width: 600px) {
   .hero {
     padding: 32px 24px;
+  }
+
+  .page {
+    padding: 32px 16px;
   }
 }
