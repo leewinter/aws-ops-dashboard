@@ -1,9 +1,12 @@
-﻿import AppContentPlaceholder from './components/AppContentPlaceholder'
-import AppShell from './components/AppShell'
+﻿import AppShell from './components/AppShell'
 import AuthForm from './components/AuthForm'
 import AuthHero from './components/AuthHero'
 import VerifyPanel from './components/VerifyPanel'
 import { useAuth } from './hooks/useAuth'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import OverviewPage from './pages/OverviewPage'
+import MagicLinksPage from './pages/MagicLinksPage'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   const {
@@ -25,7 +28,12 @@ export default function App() {
           isLoading={isLoading}
           onSignOut={logout}
         >
-          <AppContentPlaceholder />
+          <Routes>
+            <Route path="/" element={<OverviewPage />} />
+            <Route path="/magic-links" element={<MagicLinksPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </AppShell>
       </div>
     )

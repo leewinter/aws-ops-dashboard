@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react'
+import {
+  UploadOutlined,
+  UserOutlined,
+  VideoCameraOutlined
+} from '@ant-design/icons'
 import { Layout, theme } from 'antd'
+import { useLocation, useNavigate } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import AppSidebar from './AppSidebar'
 import { useLayout } from '../hooks/useLayout'
@@ -23,11 +29,35 @@ export default function AppShell({
   const {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const menuItems = [
+    {
+      key: '/',
+      icon: <UserOutlined />,
+      label: 'Overview'
+    },
+    {
+      key: '/magic-links',
+      icon: <VideoCameraOutlined />,
+      label: 'Magic Links'
+    },
+    {
+      key: '/settings',
+      icon: <UploadOutlined />,
+      label: 'Settings'
+    }
+  ]
 
   return (
     <Layout className="app-layout">
       <Sider trigger={null} collapsible collapsed={collapsed}>
-        <AppSidebar />
+        <AppSidebar
+          items={menuItems}
+          selectedKeys={[location.pathname]}
+          onSelect={(event) => navigate(event.key)}
+        />
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
