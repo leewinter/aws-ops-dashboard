@@ -71,6 +71,10 @@ function randomToken(size = 32) {
   return crypto.randomBytes(size).toString('hex')
 }
 
+function hashToken(token: string) {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
@@ -108,7 +112,8 @@ app.post('/api/auth/request', async (c) => {
   }
 
   const token = randomToken(24)
-  tokens.set(token, { email, expiresAt: Date.now() + TOKEN_TTL_MS })
+  const tokenHash = hashToken(token)
+  tokens.set(tokenHash, { email, expiresAt: Date.now() + TOKEN_TTL_MS })
 
   const origin = appOrigin ?? new URL(c.req.url).origin
   const magicUrl = new URL('/magic', origin)
@@ -146,13 +151,13 @@ app.post('/api/auth/verify', async (c) => {
     return c.json({ ok: false }, 400)
   }
 
-  const record = tokens.get(token)
+  const record = tokens.get(hashToken(token))
   if (!record || record.expiresAt < Date.now()) {
-    tokens.delete(token)
+    tokens.delete(hashToken(token))
     return c.json({ ok: false }, 400)
   }
 
-  tokens.delete(token)
+  tokens.delete(hashToken(token))
   const sessionId = randomToken(24)
   sessions.set(sessionId, {
     email: record.email,
