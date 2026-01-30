@@ -55,6 +55,18 @@ export default function AppHeader({
       key: 'theme-rose',
       label: 'Theme: Rose'
     },
+    {
+      key: 'theme-ocean',
+      label: 'Theme: Ocean'
+    },
+    {
+      key: 'theme-citrus',
+      label: 'Theme: Citrus'
+    },
+    {
+      key: 'theme-graphite',
+      label: 'Theme: Graphite'
+    },
     { type: 'divider' },
     {
       key: 'sign-out',
