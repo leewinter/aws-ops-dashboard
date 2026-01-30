@@ -1,9 +1,5 @@
 import type { ReactNode } from 'react'
-import {
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined
-} from '@ant-design/icons'
+import { HomeOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons'
 import { Layout, theme } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AppHeader from './AppHeader'
@@ -35,17 +31,17 @@ export default function AppShell({
   const menuItems = [
     {
       key: '/',
-      icon: <UserOutlined />,
+      icon: <HomeOutlined />,
       label: 'Overview'
     },
     {
       key: '/magic-links',
-      icon: <VideoCameraOutlined />,
+      icon: <MailOutlined />,
       label: 'Magic Links'
     },
     {
       key: '/settings',
-      icon: <UploadOutlined />,
+      icon: <SettingOutlined />,
       label: 'Settings'
     }
   ]
