@@ -14,6 +14,7 @@ export default function App() {
     isLoading,
     isMagic,
     status,
+    statusTone,
     user,
     setEmail,
     requestLink,
@@ -49,6 +50,7 @@ export default function App() {
             email={email}
             isLoading={isLoading}
             status={status}
+            statusTone={statusTone}
             onEmailChange={setEmail}
             onSubmit={requestLink}
           />

@@ -105,6 +105,10 @@ h1 {
   color: #3a3260;
 }
 
+.status-text.is-error {
+  color: #b42318;
+}
+
 .app-layout {
   margin-top: 24px;
   border-radius: 20px;

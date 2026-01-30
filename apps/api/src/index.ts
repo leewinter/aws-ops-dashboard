@@ -43,6 +43,11 @@ const smtpUser = process.env.SMTP_USER
 const smtpPass = process.env.SMTP_PASS
 const smtpFrom = process.env.SMTP_FROM ?? 'no-reply@localhost'
 const appOrigin = process.env.APP_ORIGIN
+const allowedEmails = (process.env.ALLOWED_EMAILS ?? '')
+  .split(',')
+  .map((value) => value.trim().toLowerCase())
+  .filter(Boolean)
+const showAllowlistError = process.env.SHOW_ALLOWLIST_ERROR === 'true'
 
 const transporter =
   smtpHost && smtpUser && smtpPass
@@ -79,6 +84,11 @@ function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
 
+function isAllowedEmail(email: string) {
+  if (allowedEmails.length === 0) return true
+  return allowedEmails.includes(email.toLowerCase())
+}
+
 function pruneExpired() {
   const now = Date.now()
   for (const [token, data] of tokens.entries()) {
@@ -108,6 +118,16 @@ app.post('/api/auth/request', async (c) => {
   const email = body?.email?.toString().trim().toLowerCase()
 
   if (!email || !isEmail(email)) {
+    return c.json({ ok: true })
+  }
+
+  if (!isAllowedEmail(email)) {
+    if (showAllowlistError) {
+      return c.json(
+        { ok: false, message: 'Email is not registered.' },
+        403
+      )
+    }
     return c.json({ ok: true })
   }
 
@@ -155,6 +175,11 @@ app.post('/api/auth/verify', async (c) => {
   if (!record || record.expiresAt < Date.now()) {
     tokens.delete(hashToken(token))
     return c.json({ ok: false }, 400)
+  }
+
+  if (!isAllowedEmail(record.email)) {
+    tokens.delete(hashToken(token))
+    return c.json({ ok: false }, 403)
   }
 
   tokens.delete(hashToken(token))

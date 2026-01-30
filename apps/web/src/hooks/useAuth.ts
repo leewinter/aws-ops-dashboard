@@ -13,6 +13,7 @@ async function fetchJson<T>(input: RequestInfo, init?: RequestInit) {
 export function useAuth() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<string | null>(null)
+  const [statusTone, setStatusTone] = useState<'info' | 'error' | null>(null)
   const [user, setUser] = useState<User>(null)
   const [isLoading, setIsLoading] = useState(false)
   const verifyStarted = useRef(false)
@@ -60,16 +61,31 @@ export function useAuth() {
       event.preventDefault()
       setIsLoading(true)
       setStatus(null)
-      await fetchJson('/api/auth/request', {
-        method: 'POST',
-        body: JSON.stringify({ email })
-      })
-        .then(() => {
-          setStatus('Check your email for the magic link.')
-          setEmail('')
+      try {
+        const res = await fetch('/api/auth/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
         })
-        .catch(() => setStatus('Could not send the link. Try again.'))
-        .finally(() => setIsLoading(false))
+        const payload = (await res.json().catch(() => null)) as
+          | { ok?: boolean; message?: string }
+          | null
+
+        if (!res.ok) {
+          setStatus(payload?.message ?? 'Could not send the link. Try again.')
+          setStatusTone('error')
+          return
+        }
+
+        setStatus('Check your email for the magic link.')
+        setStatusTone('info')
+        setEmail('')
+      } catch {
+        setStatus('Could not send the link. Try again.')
+        setStatusTone('error')
+      } finally {
+        setIsLoading(false)
+      }
     },
     [email]
   )
@@ -86,6 +102,7 @@ export function useAuth() {
     isLoading,
     isMagic,
     status,
+    statusTone,
     user,
     setEmail,
     requestLink,
