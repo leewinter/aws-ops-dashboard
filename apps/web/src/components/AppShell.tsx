@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import AppSidebar from './AppSidebar'
 import { useLayout } from '../hooks/useLayout'
+import type { ThemeKey } from '../hooks/useTheme'
 
 const { Header, Sider, Content } = Layout
 
@@ -12,6 +13,8 @@ type Props = {
   userEmail: string
   isLoading: boolean
   onSignOut: () => void
+  themeKey: ThemeKey
+  onThemeChange: (key: ThemeKey) => void
   children: ReactNode
 }
 
@@ -19,6 +22,8 @@ export default function AppShell({
   userEmail,
   isLoading,
   onSignOut,
+  themeKey,
+  onThemeChange,
   children
 }: Props) {
   const { collapsed, toggleCollapsed } = useLayout()
@@ -64,6 +69,8 @@ export default function AppShell({
             isLoading={isLoading}
             onSignOut={onSignOut}
             background={colorBgContainer}
+            themeKey={themeKey}
+            onThemeChange={onThemeChange}
           />
         </Header>
         <Content

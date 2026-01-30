@@ -136,6 +136,10 @@ h1 {
   padding-right: 16px;
 }
 
+.app-header-meta button {
+  color: inherit;
+}
+
 .app-content-placeholder h2 {
   margin: 0 0 8px;
 }
