@@ -15,6 +15,7 @@ const themeMap: Record<ThemeKey, ThemeConfig> = {
   default: {
     token: {
       colorPrimary: '#101018',
+      colorBgElevated: '#ffffff',
       borderRadius: 12
     }
   },
@@ -23,6 +24,7 @@ const themeMap: Record<ThemeKey, ThemeConfig> = {
       colorPrimary: '#ff6b6b',
       colorBgLayout: '#fff7ed',
       colorBgContainer: '#fff1f2',
+      colorBgElevated: '#ffffff',
       colorText: '#1f2937',
       borderRadius: 16
     }
@@ -32,6 +34,7 @@ const themeMap: Record<ThemeKey, ThemeConfig> = {
       colorPrimary: '#22d3ee',
       colorBgLayout: '#0b1020',
       colorBgContainer: '#121a2f',
+      colorBgElevated: '#1f2a44',
       colorText: '#e2e8f0',
       borderRadius: 10
     }
@@ -41,6 +44,7 @@ const themeMap: Record<ThemeKey, ThemeConfig> = {
       colorPrimary: '#0f766e',
       colorBgLayout: '#ecfdf3',
       colorBgContainer: '#f0fdf4',
+      colorBgElevated: '#ffffff',
       colorText: '#0f172a',
       borderRadius: 14
     }
@@ -50,6 +54,7 @@ const themeMap: Record<ThemeKey, ThemeConfig> = {
       colorPrimary: '#475569',
       colorBgLayout: '#f1f5f9',
       colorBgContainer: '#ffffff',
+      colorBgElevated: '#ffffff',
       colorText: '#1f2937',
       borderRadius: 8
     }
@@ -59,6 +64,7 @@ const themeMap: Record<ThemeKey, ThemeConfig> = {
       colorPrimary: '#db2777',
       colorBgLayout: '#fff1f2',
       colorBgContainer: '#ffe4e6',
+      colorBgElevated: '#ffffff',
       colorText: '#1f2937',
       borderRadius: 18
     }

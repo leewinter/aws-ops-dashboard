@@ -117,10 +117,20 @@ h1 {
 }
 
 .app-logo {
-  height: 32px;
+  height: 96px;
   margin: 16px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.2);
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+}
+
+.app-logo img {
+  max-height: 72px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .app-header {

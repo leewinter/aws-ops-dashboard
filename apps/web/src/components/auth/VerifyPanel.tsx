@@ -6,7 +6,7 @@ type Props = {
 export default function VerifyPanel({ isLoading, status }: Props) {
   return (
     <div className="panel">
-      <p>{isLoading ? 'Signing you in…' : status}</p>
+      <p>{isLoading ? 'Signing you in...' : status}</p>
     </div>
   )
 }

@@ -4,8 +4,8 @@ import { Layout, theme } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import AppSidebar from './AppSidebar'
-import { useLayout } from '../hooks/useLayout'
-import type { ThemeKey } from '../hooks/useTheme'
+import { useLayout } from '../../hooks/useLayout'
+import type { ThemeKey } from '../../hooks/useTheme'
 
 const { Header, Sider, Content } = Layout
 
@@ -28,7 +28,7 @@ export default function AppShell({
 }: Props) {
   const { collapsed, toggleCollapsed } = useLayout()
   const {
-    token: { colorBgContainer, borderRadiusLG }
+    token: { colorBgContainer, colorBgElevated, borderRadiusLG }
   } = theme.useToken()
   const navigate = useNavigate()
   const location = useLocation()
@@ -58,6 +58,7 @@ export default function AppShell({
           items={menuItems}
           selectedKeys={[location.pathname]}
           onSelect={(event) => navigate(event.key)}
+          logoBackground={colorBgElevated}
         />
       </Sider>
       <Layout>

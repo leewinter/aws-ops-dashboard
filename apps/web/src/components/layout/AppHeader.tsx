@@ -1,7 +1,7 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { Button, Dropdown } from 'antd'
-import type { ThemeKey } from '../hooks/useTheme'
+import type { ThemeKey } from '../../hooks/useTheme'
 
 type Props = {
   collapsed: boolean

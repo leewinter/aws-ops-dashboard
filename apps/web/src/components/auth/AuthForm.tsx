@@ -27,7 +27,7 @@ export default function AuthForm({
         required
       />
       <button className="button" type="submit" disabled={isLoading}>
-        {isLoading ? 'Sending…' : 'Send magic link'}
+        {isLoading ? 'Sending...' : 'Send magic link'}
       </button>
       {status && (
         <p className={`status-text${statusTone === 'error' ? ' is-error' : ''}`}>
