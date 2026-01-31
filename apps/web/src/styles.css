@@ -359,6 +359,14 @@ h1 {
   margin-bottom: 12px;
 }
 
+.cloudwatch-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #2b2b36;
+}
+
 .cloudwatch-footer {
   margin-top: 12px;
   display: flex;

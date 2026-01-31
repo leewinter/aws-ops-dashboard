@@ -46,6 +46,7 @@ export default function CloudWatchViewer({
   const [range, setRange] = useState<'15m' | '1h' | '24h' | '7d' | '30d'>(
     initialRange
   )
+  const [showStream, setShowStream] = useState(true)
 
   const streamList = useMemo(
     () =>
@@ -175,6 +176,14 @@ export default function CloudWatchViewer({
             { value: '30d', label: 'Last 30 days' }
           ]}
         />
+        <label className="cloudwatch-toggle">
+          <input
+            type="checkbox"
+            checked={showStream}
+            onChange={(event) => setShowStream(event.target.checked)}
+          />
+          <span>Show log stream</span>
+        </label>
       </div>
 
       {listError && <p className="log-viewer__empty">{listError}</p>}
@@ -191,7 +200,11 @@ export default function CloudWatchViewer({
                   {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '--:--'}
                 </span>
                 <span className="log-line__level">
-                  {entry.logStreamName ? entry.logStreamName.split('/').pop() : 'log'}
+                  {showStream
+                    ? entry.logStreamName
+                      ? entry.logStreamName.split('/').pop()
+                      : 'log'
+                    : 'log'}
                 </span>
                 <span className="log-line__message">{entry.message}</span>
               </li>
