@@ -22,11 +22,30 @@ wsl -d Ubuntu-24.04 --cd /home/lee/projects/hono-magic-link -- npm install
 
 Create a `.env` file in the repo root (same level as `package.json`). Use `.env.example` as a starting point.
 
-### App + auth
+### Required
 
+**Core app**
 - `APP_ORIGIN` (string)
   - Base URL used to construct the magic link.
   - Dev default: `http://localhost:5173`.
+
+**SMTP**
+- `SMTP_HOST` (string)
+  - SMTP host name. For SES (example): `email-smtp.us-east-1.amazonaws.com`.
+- `SMTP_PORT` (number)
+  - Common values: `587` (STARTTLS) or `465` (SSL).
+- `SMTP_USER` (string)
+  - SMTP username (SES SMTP user if using SES).
+- `SMTP_PASS` (string)
+  - SMTP password (SES SMTP password if using SES).
+- `SMTP_FROM` (string)
+  - From address used when sending the email.
+  - Must be verified in SES if you are in SES sandbox.
+
+If SMTP is not configured, the magic link is logged to the API console.
+
+### Optional (auth behavior)
+
 - `ALLOWED_EMAILS` (comma-separated list)
   - Allowlist of emails that can request links. Example:
     - `ALLOWED_EMAILS=you@example.com,teammate@example.com`
@@ -40,6 +59,9 @@ Create a `.env` file in the repo root (same level as `package.json`). Use `.env.
 - `SESSION_TTL_MS` (number)
   - Session cookie time-to-live in milliseconds.
   - Default: `604800000` (7 days).
+
+### Optional (log viewer)
+
 - `ENABLE_LOG_VIEWER` (`true`/`false`)
   - Enables the log viewer SSE endpoint and UI panel.
   - Default: `false`.
@@ -49,6 +71,9 @@ Create a `.env` file in the repo root (same level as `package.json`). Use `.env.
 - `LOG_LEVEL` (string)
   - Winston log level (e.g. `error`, `warn`, `info`, `debug`).
   - Default: `info`.
+
+### Optional (CloudWatch viewer)
+
 - `ENABLE_CLOUDWATCH_VIEWER` (`true`/`false`)
   - Enables CloudWatch log viewer API and UI panel.
   - Default: `false`.
@@ -110,22 +135,6 @@ Example IAM policy for read-only access:
   ]
 }
 ```
-
-### SMTP (SES or any SMTP provider)
-
-- `SMTP_HOST` (string)
-  - SMTP host name. For SES (example): `email-smtp.us-east-1.amazonaws.com`.
-- `SMTP_PORT` (number)
-  - Common values: `587` (STARTTLS) or `465` (SSL).
-- `SMTP_USER` (string)
-  - SMTP username (SES SMTP user if using SES).
-- `SMTP_PASS` (string)
-  - SMTP password (SES SMTP password if using SES).
-- `SMTP_FROM` (string)
-  - From address used when sending the email.
-  - Must be verified in SES if you are in SES sandbox.
-
-If SMTP is not configured, the magic link is logged to the API console.
 
 ## Docker
 
