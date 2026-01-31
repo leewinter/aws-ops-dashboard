@@ -272,6 +272,23 @@ h1 {
   opacity: 0.7;
 }
 
+.cloudwatch-viewer .log-viewer__body {
+  background: #0f172a;
+}
+
+.cloudwatch-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cloudwatch-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 @keyframes logFlash {
   0% {
     box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8);

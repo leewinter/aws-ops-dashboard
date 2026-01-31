@@ -49,6 +49,16 @@ Create a `.env` file in the repo root (same level as `package.json`). Use `.env.
 - `LOG_LEVEL` (string)
   - Winston log level (e.g. `error`, `warn`, `info`, `debug`).
   - Default: `info`.
+- `ENABLE_CLOUDWATCH_VIEWER` (`true`/`false`)
+  - Enables CloudWatch log viewer API and UI panel.
+  - Default: `false`.
+- `CLOUDWATCH_LOG_GROUP` (string)
+  - Default log group for the CloudWatch viewer.
+- `AWS_REGION` (string)
+  - AWS region for CloudWatch Logs (e.g. `us-east-1`).
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_SESSION_TOKEN`
+  - Optional static credentials. If not set, the app uses the default AWS SDK
+    credential chain (IAM role, ECS task role, etc.).
 
 ### SMTP (SES or any SMTP provider)
 

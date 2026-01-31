@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { env } from './config/env'
 import { registerAuthRoutes } from './routes/auth'
+import { registerCloudWatchRoutes } from './routes/cloudwatch'
 import { registerHealthRoutes } from './routes/health'
 import { registerLogRoutes } from './routes/logs'
 
@@ -12,6 +13,7 @@ export function createApp() {
 
   registerHealthRoutes(app)
   registerLogRoutes(app)
+  registerCloudWatchRoutes(app)
   registerAuthRoutes(app)
 
   if (env.nodeEnv === 'production') {

@@ -1,4 +1,5 @@
 import LogViewer from '../components/logs/LogViewer'
+import CloudWatchViewer from '../components/logs/CloudWatchViewer'
 
 export default function SettingsPage() {
   return (
@@ -8,6 +9,7 @@ export default function SettingsPage() {
         <p>Manage SMTP, session, and security preferences.</p>
       </div>
       <LogViewer />
+      <CloudWatchViewer />
     </div>
   )
 }
