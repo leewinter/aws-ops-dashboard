@@ -164,6 +164,29 @@ h1 {
   color: #4b4558;
 }
 
+.widget-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.widget-card {
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.widget-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.widget-card__header h3 {
+  margin: 0;
+}
+
 .log-viewer {
   border-radius: 16px;
   border: 1px solid rgba(15, 23, 42, 0.1);

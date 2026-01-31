@@ -2,13 +2,31 @@ import { Button, Checkbox, Input } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLogStream } from '../../hooks/useLogStream'
 
-export default function LogViewer() {
+type Props = {
+  showSave?: boolean
+  initialTailEnabled?: boolean
+  initialLevels?: string[]
+  initialQuery?: string
+  onSaveWidget?: (config: {
+    tailEnabled: boolean
+    levels: string[]
+    query: string
+  }) => void
+}
+
+export default function LogViewer({
+  showSave,
+  initialTailEnabled = true,
+  initialLevels = ['info', 'warn', 'error', 'debug'],
+  initialQuery = '',
+  onSaveWidget
+}: Props) {
   const { enabled, logs, status, clearLogs } = useLogStream()
   const tailRef = useRef<HTMLDivElement | null>(null)
   const [flash, setFlash] = useState(false)
-  const [tailEnabled, setTailEnabled] = useState(true)
-  const [levels, setLevels] = useState<string[]>(['info', 'warn', 'error', 'debug'])
-  const [query, setQuery] = useState('')
+  const [tailEnabled, setTailEnabled] = useState(initialTailEnabled)
+  const [levels, setLevels] = useState<string[]>(initialLevels)
+  const [query, setQuery] = useState(initialQuery)
 
   useEffect(() => {
     if (tailEnabled) {
@@ -75,6 +93,20 @@ export default function LogViewer() {
             options={['info', 'warn', 'error', 'debug']}
             onChange={(checked) => setLevels(checked as string[])}
           />
+          {showSave && onSaveWidget && (
+            <Button
+              size="small"
+              onClick={() =>
+                onSaveWidget({
+                  tailEnabled,
+                  levels,
+                  query
+                })
+              }
+            >
+              Save widget
+            </Button>
+          )}
           <Button size="small" onClick={clearLogs}>
             Clear
           </Button>

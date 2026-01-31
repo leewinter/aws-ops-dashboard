@@ -2,7 +2,30 @@ import { Button, Input, Select } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useCloudWatchLogs } from '../../hooks/useCloudWatchLogs'
 
-export default function CloudWatchViewer() {
+type Props = {
+  showSave?: boolean
+  initialLogGroup?: string
+  initialLogStreams?: string
+  initialFilterPattern?: string
+  initialRange?: '15m' | '1h' | '24h' | '7d' | '30d'
+  autoFetch?: boolean
+  onSaveWidget?: (config: {
+    logGroup: string
+    logStreams: string
+    filterPattern: string
+    range: '15m' | '1h' | '24h' | '7d' | '30d'
+  }) => void
+}
+
+export default function CloudWatchViewer({
+  showSave,
+  initialLogGroup,
+  initialLogStreams = '',
+  initialFilterPattern = '',
+  initialRange = '1h',
+  autoFetch,
+  onSaveWidget
+}: Props) {
   const {
     enabled,
     region,
@@ -17,10 +40,21 @@ export default function CloudWatchViewer() {
     isListing,
     listError
   } = useCloudWatchLogs()
-  const [logGroup, setLogGroup] = useState(defaultLogGroup ?? '')
-  const [logStreams, setLogStreams] = useState('')
-  const [filterPattern, setFilterPattern] = useState('')
-  const [range, setRange] = useState<'15m' | '1h' | '24h' | '7d' | '30d'>('1h')
+  const [logGroup, setLogGroup] = useState(initialLogGroup ?? defaultLogGroup ?? '')
+  const [logStreams, setLogStreams] = useState(initialLogStreams)
+  const [filterPattern, setFilterPattern] = useState(initialFilterPattern)
+  const [range, setRange] = useState<'15m' | '1h' | '24h' | '7d' | '30d'>(
+    initialRange
+  )
+
+  const streamList = useMemo(
+    () =>
+      logStreams
+        .split(',')
+        .map((name) => name.trim())
+        .filter(Boolean),
+    [logStreams]
+  )
 
   const timeRange = useMemo(() => {
     const now = Date.now()
@@ -43,10 +77,16 @@ export default function CloudWatchViewer() {
     }
   }, [defaultLogGroup, logGroup])
 
-  const streamList = logStreams
-    .split(',')
-    .map((name) => name.trim())
-    .filter(Boolean)
+  useEffect(() => {
+    if (!autoFetch) return
+    if (!logGroup) return
+    loadLogs({
+      logGroupName: logGroup,
+      logStreamNames: streamList.length ? streamList : undefined,
+      filterPattern: filterPattern || undefined,
+      ...timeRange
+    })
+  }, [autoFetch, filterPattern, loadLogs, logGroup, streamList, timeRange])
 
   if (!enabled) {
     return (
@@ -64,20 +104,38 @@ export default function CloudWatchViewer() {
           <h3>CloudWatch logs</h3>
           <span className="log-viewer__status">Region: {region ?? 'unknown'}</span>
         </div>
-        <Button
-          size="small"
-          onClick={() =>
-            loadLogs({
-              logGroupName: logGroup,
-              logStreamNames: streamList.length ? streamList : undefined,
-              filterPattern: filterPattern || undefined,
-              ...timeRange
-            })
-          }
-          disabled={!logGroup || isLoading}
-        >
-          Fetch
-        </Button>
+        <div className="log-viewer__actions">
+          {showSave && onSaveWidget && (
+            <Button
+              size="small"
+              onClick={() =>
+                onSaveWidget({
+                  logGroup,
+                  logStreams,
+                  filterPattern,
+                  range
+                })
+              }
+              disabled={!logGroup}
+            >
+              Save widget
+            </Button>
+          )}
+          <Button
+            size="small"
+            onClick={() =>
+              loadLogs({
+                logGroupName: logGroup,
+                logStreamNames: streamList.length ? streamList : undefined,
+                filterPattern: filterPattern || undefined,
+                ...timeRange
+              })
+            }
+            disabled={!logGroup || isLoading}
+          >
+            Fetch
+          </Button>
+        </div>
       </div>
 
       <div className="cloudwatch-controls">
