@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { HomeOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons'
+import { HomeOutlined, SettingOutlined } from '@ant-design/icons'
 import { Layout, theme } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AppHeader from './AppHeader'
@@ -38,11 +38,6 @@ export default function AppShell({
       key: '/',
       icon: <HomeOutlined />,
       label: 'Overview'
-    },
-    {
-      key: '/magic-links',
-      icon: <MailOutlined />,
-      label: 'Magic Links'
     },
     {
       key: '/settings',

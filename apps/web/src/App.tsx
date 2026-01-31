@@ -7,7 +7,6 @@ import VerifyPanel from './components/auth/VerifyPanel'
 import { useAuth } from './hooks/useAuth'
 import { useTheme } from './hooks/useTheme'
 import OverviewPage from './pages/OverviewPage'
-import MagicLinksPage from './pages/MagicLinksPage'
 import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
@@ -37,7 +36,6 @@ export default function App() {
           >
             <Routes>
               <Route path="/" element={<OverviewPage />} />
-              <Route path="/magic-links" element={<MagicLinksPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
