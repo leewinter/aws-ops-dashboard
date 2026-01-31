@@ -39,6 +39,16 @@ export default function SqsViewer({
   const [autoPoll, setAutoPoll] = useState(initialAutoPoll)
   const intervalRef = useRef<number | null>(null)
 
+  const uniqueMessages = useMemo(() => {
+    const seen = new Set<string>()
+    return messages.filter((message) => {
+      const key = message.MessageId ?? `${message.Body ?? ''}-${message.Attributes?.SentTimestamp ?? ''}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }, [messages])
+
   useEffect(() => {
     if (enabled) {
       loadQueues()
@@ -53,9 +63,9 @@ export default function SqsViewer({
 
   useEffect(() => {
     if (!autoPoll || !queueUrl) return
-    loadMessages({ queueUrl, maxNumber })
+    loadMessages({ queueUrl, maxNumber, append: true })
     intervalRef.current = window.setInterval(() => {
-      loadMessages({ queueUrl, maxNumber })
+      loadMessages({ queueUrl, maxNumber, append: true })
     }, 5000)
     return () => {
       if (intervalRef.current) {
@@ -94,12 +104,12 @@ export default function SqsViewer({
               }
               disabled={!queueUrl}
             >
-              Save widget
+              Add widget
             </Button>
           )}
           <Button
             size="small"
-            onClick={() => loadMessages({ queueUrl, maxNumber })}
+            onClick={() => loadMessages({ queueUrl, maxNumber, append: true })}
             disabled={!queueUrl || isLoading}
           >
             Fetch
@@ -141,11 +151,11 @@ export default function SqsViewer({
       {error && <p className="log-viewer__empty">{error}</p>}
 
       <div className="log-viewer__body">
-        {messages.length === 0 ? (
+        {uniqueMessages.length === 0 ? (
           <p className="log-viewer__empty">No messages.</p>
         ) : (
           <ul>
-            {messages.map((message, index) => (
+            {uniqueMessages.map((message, index) => (
               <li key={message.MessageId ?? index} className="log-line log-line--info">
                 <span className="log-line__time">
                   {message.Attributes?.SentTimestamp

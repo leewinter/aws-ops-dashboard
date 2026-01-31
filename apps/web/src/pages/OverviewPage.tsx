@@ -1,8 +1,8 @@
-import { Button } from 'antd'
 import LogViewer from '../components/logs/LogViewer'
 import CloudWatchViewer from '../components/logs/CloudWatchViewer'
 import SqsViewer from '../components/logs/SqsViewer'
 import { useWidgets } from '../hooks/useWidgets'
+import WidgetCard from '../components/widgets/WidgetCard'
 
 export default function OverviewPage() {
   const { widgets, removeWidget } = useWidgets()
@@ -19,13 +19,7 @@ export default function OverviewPage() {
         </div>
       )}
       {pageWidgets.map((widget) => (
-        <div key={widget.id} className="widget-card">
-          <div className="widget-card__header">
-            <h3>{widget.title}</h3>
-            <Button size="small" onClick={() => removeWidget(widget.id)}>
-              Remove
-            </Button>
-          </div>
+        <WidgetCard key={widget.id} widget={widget} onRemove={removeWidget}>
           {widget.type === 'log' ? (
             <LogViewer
               initialTailEnabled={widget.config.tailEnabled}
@@ -47,7 +41,7 @@ export default function OverviewPage() {
               initialAutoPoll={widget.config.autoPoll}
             />
           )}
-        </div>
+        </WidgetCard>
       ))}
     </div>
   )

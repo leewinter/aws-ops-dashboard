@@ -104,7 +104,7 @@ export default function LogViewer({
                 })
               }
             >
-              Save widget
+              Add widget
             </Button>
           )}
           <Button size="small" onClick={clearLogs}>

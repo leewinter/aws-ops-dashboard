@@ -13,35 +13,31 @@ export type LogViewerWidgetConfig = {
   query: string
 }
 
+export type WidgetBase = {
+  id: string
+  type: 'log' | 'cloudwatch' | 'sqs'
+  title: string
+  createdAt: number
+  pageId: string
+}
+
 export type Widget =
-  | {
-      id: string
+  | (WidgetBase & {
       type: 'log'
-      title: string
-      createdAt: number
-      pageId: string
       config: LogViewerWidgetConfig
-    }
-  | {
-      id: string
+    })
+  | (WidgetBase & {
       type: 'cloudwatch'
-      title: string
-      createdAt: number
-      pageId: string
       config: CloudWatchWidgetConfig
-    }
-  | {
-      id: string
+    })
+  | (WidgetBase & {
       type: 'sqs'
-      title: string
-      createdAt: number
-      pageId: string
       config: {
         queueUrl: string
         maxNumber: number
         autoPoll: boolean
       }
-    }
+    })
 
 const STORAGE_KEY = 'hono-widgets'
 
@@ -72,17 +68,17 @@ export function useWidgets() {
   }, [])
 
   const addWidget = useCallback((widget: Omit<Widget, 'id' | 'createdAt'>) => {
-    const next: Widget = {
-      ...widget,
-      id: `widget-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      createdAt: Date.now()
-    }
-    setWidgets((prev) => {
-      const updated = [next, ...prev]
-      saveWidgets(updated)
-      return updated
-    })
-  }, [])
+      const next: Widget = {
+        ...(widget as Widget),
+        id: `widget-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: Date.now()
+      }
+      setWidgets((prev) => {
+        const updated = [next, ...prev]
+        saveWidgets(updated)
+        return updated
+      })
+    }, [])
 
   const removeWidget = useCallback((id: string) => {
     setWidgets((prev) => {

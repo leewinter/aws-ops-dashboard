@@ -14,6 +14,13 @@ type EnabledResponse = {
   region: string | null
 }
 
+type LoadMessagesParams = {
+  queueUrl: string
+  maxNumber?: number
+  waitSeconds?: number
+  append?: boolean
+}
+
 export function useSqsMessages() {
   const [enabled, setEnabled] = useState(false)
   const [region, setRegion] = useState<string | null>(null)
@@ -60,8 +67,7 @@ export function useSqsMessages() {
     }
   }, [])
 
-  const loadMessages = useCallback(
-    async (params: { queueUrl: string; maxNumber?: number; waitSeconds?: number }) => {
+  const loadMessages = useCallback(async (params: LoadMessagesParams) => {
       setIsLoading(true)
       setError(null)
       const query = new URLSearchParams()
@@ -78,15 +84,35 @@ export function useSqsMessages() {
           setError(payload?.message ?? 'Failed to fetch messages.')
           return
         }
-        setMessages(payload.messages ?? [])
+        const nextMessages = payload.messages ?? []
+        if (params.append) {
+          setMessages((prev) => {
+            const combined = [...prev, ...nextMessages]
+            const seen = new Set<string>()
+            const unique = combined.filter((message) => {
+              const key =
+                message.MessageId ??
+                `${message.Body ?? ''}-${message.Attributes?.SentTimestamp ?? ''}`
+              if (seen.has(key)) return false
+              seen.add(key)
+              return true
+            })
+            unique.sort((a, b) => {
+              const aTime = Number(a.Attributes?.SentTimestamp ?? 0)
+              const bTime = Number(b.Attributes?.SentTimestamp ?? 0)
+              return bTime - aTime
+            })
+            return unique
+          })
+        } else {
+          setMessages(nextMessages)
+        }
       } catch {
         setError('Failed to fetch messages.')
       } finally {
         setIsLoading(false)
       }
-    },
-    []
-  )
+  }, [])
 
   return {
     enabled,

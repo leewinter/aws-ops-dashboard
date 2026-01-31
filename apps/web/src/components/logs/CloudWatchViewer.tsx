@@ -119,7 +119,7 @@ export default function CloudWatchViewer({
               }
               disabled={!logGroup}
             >
-              Save widget
+              Add widget
             </Button>
           )}
           <Button

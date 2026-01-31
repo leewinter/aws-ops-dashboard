@@ -1,4 +1,3 @@
-import { Button } from 'antd'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useCustomPages } from '../hooks/useCustomPages'
@@ -6,6 +5,7 @@ import { useWidgets } from '../hooks/useWidgets'
 import CloudWatchViewer from '../components/logs/CloudWatchViewer'
 import LogViewer from '../components/logs/LogViewer'
 import SqsViewer from '../components/logs/SqsViewer'
+import WidgetCard from '../components/widgets/WidgetCard'
 
 export default function DynamicPage() {
   const { pageId } = useParams()
@@ -38,13 +38,7 @@ export default function DynamicPage() {
         </div>
       )}
       {pageWidgets.map((widget) => (
-        <div key={widget.id} className="widget-card">
-          <div className="widget-card__header">
-            <h3>{widget.title}</h3>
-            <Button size="small" onClick={() => removeWidget(widget.id)}>
-              Remove
-            </Button>
-          </div>
+        <WidgetCard key={widget.id} widget={widget} onRemove={removeWidget}>
           {widget.type === 'log' ? (
             <LogViewer
               initialTailEnabled={widget.config.tailEnabled}
@@ -66,7 +60,7 @@ export default function DynamicPage() {
               initialAutoPoll={widget.config.autoPoll}
             />
           )}
-        </div>
+        </WidgetCard>
       ))}
     </div>
   )

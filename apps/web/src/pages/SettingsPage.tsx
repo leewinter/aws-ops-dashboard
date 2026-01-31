@@ -204,7 +204,7 @@ export default function SettingsPage() {
           setIsDestinationOpen(false)
           setPendingSave(null)
         }}
-        okText="Save widget"
+        okText="Add widget"
       >
         <p>Select which page this widget should appear on.</p>
         <Select
