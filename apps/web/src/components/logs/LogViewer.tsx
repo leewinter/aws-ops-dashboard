@@ -117,8 +117,11 @@ export default function LogViewer({
           <p className="log-viewer__empty">No logs yet.</p>
         ) : (
           <ul>
-            {filteredLogs.map((entry) => (
-              <li key={entry.id} className={`log-line log-line--${entry.level}`}>
+            {filteredLogs.map((entry, index) => (
+              <li
+                key={`${entry.id}-${entry.ts}-${index}`}
+                className={`log-line log-line--${entry.level}`}
+              >
                 <span className="log-line__time">
                   {new Date(entry.ts).toLocaleString()}
                 </span>
