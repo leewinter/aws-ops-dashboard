@@ -60,6 +60,57 @@ Create a `.env` file in the repo root (same level as `package.json`). Use `.env.
   - Optional static credentials. If not set, the app uses the default AWS SDK
     credential chain (IAM role, ECS task role, etc.).
 
+## CloudWatch Logs viewer
+
+Enable the viewer with:
+
+```
+ENABLE_CLOUDWATCH_VIEWER=true
+AWS_REGION=us-east-1
+```
+
+If running outside AWS IAM, also set:
+
+```
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_SESSION_TOKEN=...
+```
+
+Example IAM policy for read-only access:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudWatchRead",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:GetMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListMetrics",
+        "cloudwatch:DescribeAlarms"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogsRead",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:StartQuery",
+        "logs:GetQueryResults"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 ### SMTP (SES or any SMTP provider)
 
 - `SMTP_HOST` (string)
