@@ -1,8 +1,40 @@
-import { Button } from 'antd'
+import { Button, Checkbox, Input } from 'antd'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLogStream } from '../../hooks/useLogStream'
 
 export default function LogViewer() {
   const { enabled, logs, status, clearLogs } = useLogStream()
+  const tailRef = useRef<HTMLDivElement | null>(null)
+  const [flash, setFlash] = useState(false)
+  const [tailEnabled, setTailEnabled] = useState(true)
+  const [levels, setLevels] = useState<string[]>(['info', 'warn', 'error', 'debug'])
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    if (tailEnabled) {
+      tailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+    if (logs.length > 0) {
+      setFlash(false)
+      const frame = window.requestAnimationFrame(() => setFlash(true))
+      const timer = window.setTimeout(() => setFlash(false), 650)
+      return () => {
+        window.cancelAnimationFrame(frame)
+        window.clearTimeout(timer)
+      }
+    }
+  }, [logs, tailEnabled])
+
+  const filteredLogs = useMemo(() => {
+    if (levels.length === 0) return []
+    const allowed = new Set(levels)
+    const normalized = query.trim().toLowerCase()
+    return logs.filter((entry) => {
+      if (!allowed.has(entry.level)) return false
+      if (!normalized) return true
+      return entry.message.toLowerCase().includes(normalized)
+    })
+  }, [levels, logs, query])
 
   if (!enabled) {
     return (
@@ -14,7 +46,7 @@ export default function LogViewer() {
   }
 
   return (
-    <div className="log-viewer">
+    <div className={`log-viewer${flash ? ' log-viewer--flash' : ''}`}>
       <div className="log-viewer__header">
         <div>
           <h3>Log viewer</h3>
@@ -22,16 +54,38 @@ export default function LogViewer() {
             {status}
           </span>
         </div>
-        <Button size="small" onClick={clearLogs}>
-          Clear
-        </Button>
+        <div className="log-viewer__actions">
+          <Input
+            className="log-viewer__search"
+            size="small"
+            placeholder="Search logs"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            allowClear
+          />
+          <Checkbox
+            checked={tailEnabled}
+            onChange={(event) => setTailEnabled(event.target.checked)}
+          >
+            Tail log
+          </Checkbox>
+          <Checkbox.Group
+            className="log-viewer__levels"
+            value={levels}
+            options={['info', 'warn', 'error', 'debug']}
+            onChange={(checked) => setLevels(checked as string[])}
+          />
+          <Button size="small" onClick={clearLogs}>
+            Clear
+          </Button>
+        </div>
       </div>
       <div className="log-viewer__body">
-        {logs.length === 0 ? (
+        {filteredLogs.length === 0 ? (
           <p className="log-viewer__empty">No logs yet.</p>
         ) : (
           <ul>
-            {logs.map((entry) => (
+            {filteredLogs.map((entry) => (
               <li key={entry.id} className={`log-line log-line--${entry.level}`}>
                 <span className="log-line__time">
                   {new Date(entry.ts).toLocaleTimeString()}
@@ -42,6 +96,7 @@ export default function LogViewer() {
             ))}
           </ul>
         )}
+        <div ref={tailRef} />
       </div>
     </div>
   )

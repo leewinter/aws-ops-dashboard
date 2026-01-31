@@ -5,9 +5,11 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { streamSSE } from 'hono/streaming'
 import nodemailer from 'nodemailer'
+import winston from 'winston'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
+import { Writable } from 'node:stream'
 
 type MagicToken = {
   email: string
@@ -46,6 +48,7 @@ const TOKEN_TTL_MS = Number(process.env.TOKEN_TTL_MS ?? 15 * 60 * 1000)
 const SESSION_TTL_MS = Number(process.env.SESSION_TTL_MS ?? 7 * 24 * 60 * 60 * 1000)
 const ENABLE_LOG_VIEWER = process.env.ENABLE_LOG_VIEWER === 'true'
 const LOG_BUFFER_SIZE = Number(process.env.LOG_BUFFER_SIZE ?? 500)
+const LOG_LEVEL = process.env.LOG_LEVEL ?? 'info'
 
 const smtpHost = process.env.SMTP_HOST
 const smtpPort = Number(process.env.SMTP_PORT ?? 587)
@@ -63,22 +66,13 @@ const logBuffer: LogEntry[] = []
 let logCounter = 0
 const logSubscribers = new Set<import('hono/streaming').SSEStreamingApi>()
 
-function formatLogArg(value: unknown) {
-  if (typeof value === 'string') return value
-  try {
-    return JSON.stringify(value)
-  } catch {
-    return String(value)
-  }
-}
-
-function pushLog(level: string, args: unknown[]) {
+function pushLog(level: string, message: string) {
   if (!ENABLE_LOG_VIEWER) return
   const entry: LogEntry = {
     id: ++logCounter,
     ts: Date.now(),
     level,
-    message: args.map(formatLogArg).join(' ')
+    message
   }
   logBuffer.push(entry)
   if (logBuffer.length > LOG_BUFFER_SIZE) {
@@ -97,36 +91,50 @@ function pushLog(level: string, args: unknown[]) {
   }
 }
 
-if (ENABLE_LOG_VIEWER) {
-  const original = {
-    log: console.log,
-    info: console.info,
-    warn: console.warn,
-    error: console.error,
-    debug: console.debug
+const logViewerStream = new Writable({
+  write(chunk, _encoding, callback) {
+    if (!ENABLE_LOG_VIEWER) {
+      callback()
+      return
+    }
+    const message = chunk.toString().trim()
+    if (!message) {
+      callback()
+      return
+    }
+    try {
+      const parsed = JSON.parse(message) as { level?: string; message?: string }
+      const level = parsed.level ?? 'info'
+      const msg = parsed.message ?? message
+      pushLog(level, msg)
+    } catch {
+      pushLog('info', message)
+    }
+    callback()
   }
+})
 
-  console.log = (...args: unknown[]) => {
-    pushLog('log', args)
-    original.log(...args)
-  }
-  console.info = (...args: unknown[]) => {
-    pushLog('info', args)
-    original.info(...args)
-  }
-  console.warn = (...args: unknown[]) => {
-    pushLog('warn', args)
-    original.warn(...args)
-  }
-  console.error = (...args: unknown[]) => {
-    pushLog('error', args)
-    original.error(...args)
-  }
-  console.debug = (...args: unknown[]) => {
-    pushLog('debug', args)
-    original.debug(...args)
-  }
-}
+const logViewerTransport = ENABLE_LOG_VIEWER
+  ? new winston.transports.Stream({ stream: logViewerStream })
+  : null
+
+const logger = winston.createLogger({
+  level: LOG_LEVEL,
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        winston.format.printf(({ level, message, timestamp }) => {
+          return `${timestamp} ${level}: ${message}`
+        })
+      )
+    }),
+    ...(logViewerTransport ? [logViewerTransport] : [])
+  ]
+})
+
 
 const transporter =
   smtpHost && smtpUser && smtpPass
@@ -142,13 +150,13 @@ if (transporter) {
   transporter
     .verify()
     .then(() => {
-      console.log('[smtp] transporter verified')
+      logger.info('[smtp] transporter verified')
     })
     .catch((error) => {
-      console.error('[smtp] transporter verify failed', error)
+      logger.error('[smtp] transporter verify failed', error)
     })
 } else {
-  console.warn('[smtp] transporter not configured; magic links will be logged')
+  logger.warn('[smtp] transporter not configured; magic links will be logged')
 }
 
 function randomToken(size = 32) {
@@ -259,15 +267,18 @@ app.post('/api/auth/request', async (c) => {
         text: `Use this link to sign in: ${magicUrl.toString()}`,
         html: `<p>Use this link to sign in:</p><p><a href="${magicUrl.toString()}">${magicUrl.toString()}</a></p>`
       })
-      console.log('[smtp] sendMail ok', {
-        messageId: info.messageId,
-        response: info.response
-      })
+      logger.info(
+        '[smtp] sendMail ok ' +
+          JSON.stringify({
+            messageId: info.messageId,
+            response: info.response
+          })
+      )
     } catch (error) {
-      console.error('[smtp] sendMail failed', error)
+      logger.error('[smtp] sendMail failed', error)
     }
   } else {
-    console.log(`[magic-link] ${email} -> ${magicUrl.toString()}`)
+    logger.info(`[magic-link] ${email} -> ${magicUrl.toString()}`)
   }
 
   return c.json({ ok: true })
@@ -342,4 +353,4 @@ const port = Number(process.env.PORT ?? 8787)
 
 serve({ fetch: app.fetch, port })
 
-console.log(`Hono API listening on http://localhost:${port}`)
+logger.info(`Hono API listening on http://localhost:${port}`)

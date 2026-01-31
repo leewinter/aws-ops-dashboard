@@ -46,6 +46,9 @@ Create a `.env` file in the repo root (same level as `package.json`). Use `.env.
 - `LOG_BUFFER_SIZE` (number)
   - Maximum number of log lines kept in memory for the viewer.
   - Default: `500`.
+- `LOG_LEVEL` (string)
+  - Winston log level (e.g. `error`, `warn`, `info`, `debug`).
+  - Default: `info`.
 
 ### SMTP (SES or any SMTP provider)
 

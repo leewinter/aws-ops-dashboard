@@ -171,6 +171,13 @@ h1 {
   background: rgba(255, 255, 255, 0.7);
 }
 
+.log-viewer--flash {
+  animation: logFlash 0.65s ease-out;
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2),
+    0 0 24px rgba(56, 189, 248, 0.4);
+}
+
 .log-viewer__header {
   display: flex;
   align-items: center;
@@ -191,8 +198,25 @@ h1 {
   color: #64748b;
 }
 
+.log-viewer__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.log-viewer__search {
+  width: 220px;
+}
+
+.log-viewer__levels {
+  display: inline-flex;
+  gap: 6px;
+}
+
 .log-viewer__body {
-  max-height: 320px;
+  max-height: 520px;
   overflow: auto;
   border-radius: 12px;
   background: #0f172a;
@@ -246,6 +270,15 @@ h1 {
 
 .log-viewer--disabled {
   opacity: 0.7;
+}
+
+@keyframes logFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgba(56, 189, 248, 0);
+  }
 }
 
 .app-content-placeholder h2 {
