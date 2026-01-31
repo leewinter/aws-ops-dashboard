@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
+import { streamSSE } from 'hono/streaming'
 import nodemailer from 'nodemailer'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
@@ -16,6 +17,13 @@ type MagicToken = {
 type Session = {
   email: string
   expiresAt: number
+}
+
+type LogEntry = {
+  id: number
+  ts: number
+  level: string
+  message: string
 }
 
 const envCandidates = [
@@ -36,6 +44,8 @@ const sessions = new Map<string, Session>()
 
 const TOKEN_TTL_MS = Number(process.env.TOKEN_TTL_MS ?? 15 * 60 * 1000)
 const SESSION_TTL_MS = Number(process.env.SESSION_TTL_MS ?? 7 * 24 * 60 * 60 * 1000)
+const ENABLE_LOG_VIEWER = process.env.ENABLE_LOG_VIEWER === 'true'
+const LOG_BUFFER_SIZE = Number(process.env.LOG_BUFFER_SIZE ?? 500)
 
 const smtpHost = process.env.SMTP_HOST
 const smtpPort = Number(process.env.SMTP_PORT ?? 587)
@@ -48,6 +58,75 @@ const allowedEmails = (process.env.ALLOWED_EMAILS ?? '')
   .map((value) => value.trim().toLowerCase())
   .filter(Boolean)
 const showAllowlistError = process.env.SHOW_ALLOWLIST_ERROR === 'true'
+
+const logBuffer: LogEntry[] = []
+let logCounter = 0
+const logSubscribers = new Set<import('hono/streaming').SSEStreamingApi>()
+
+function formatLogArg(value: unknown) {
+  if (typeof value === 'string') return value
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
+
+function pushLog(level: string, args: unknown[]) {
+  if (!ENABLE_LOG_VIEWER) return
+  const entry: LogEntry = {
+    id: ++logCounter,
+    ts: Date.now(),
+    level,
+    message: args.map(formatLogArg).join(' ')
+  }
+  logBuffer.push(entry)
+  if (logBuffer.length > LOG_BUFFER_SIZE) {
+    logBuffer.shift()
+  }
+  for (const subscriber of logSubscribers) {
+    subscriber
+      .writeSSE({
+        event: 'log',
+        id: String(entry.id),
+        data: JSON.stringify(entry)
+      })
+      .catch(() => {
+        logSubscribers.delete(subscriber)
+      })
+  }
+}
+
+if (ENABLE_LOG_VIEWER) {
+  const original = {
+    log: console.log,
+    info: console.info,
+    warn: console.warn,
+    error: console.error,
+    debug: console.debug
+  }
+
+  console.log = (...args: unknown[]) => {
+    pushLog('log', args)
+    original.log(...args)
+  }
+  console.info = (...args: unknown[]) => {
+    pushLog('info', args)
+    original.info(...args)
+  }
+  console.warn = (...args: unknown[]) => {
+    pushLog('warn', args)
+    original.warn(...args)
+  }
+  console.error = (...args: unknown[]) => {
+    pushLog('error', args)
+    original.error(...args)
+  }
+  console.debug = (...args: unknown[]) => {
+    pushLog('debug', args)
+    original.debug(...args)
+  }
+}
 
 const transporter =
   smtpHost && smtpUser && smtpPass
@@ -101,6 +180,38 @@ function pruneExpired() {
 
 app.get('/api/health', (c) => {
   return c.json({ ok: true, time: new Date().toISOString() })
+})
+
+app.get('/api/logs/enabled', (c) => {
+  return c.json({ enabled: ENABLE_LOG_VIEWER })
+})
+
+app.get('/api/logs/stream', (c) => {
+  if (!ENABLE_LOG_VIEWER) {
+    return c.json({ ok: false }, 404)
+  }
+  return streamSSE(c, async (stream) => {
+    logSubscribers.add(stream)
+    stream.onAbort(() => {
+      logSubscribers.delete(stream)
+    })
+
+    for (const entry of logBuffer) {
+      await stream.writeSSE({
+        event: 'log',
+        id: String(entry.id),
+        data: JSON.stringify(entry)
+      })
+    }
+
+    while (!stream.aborted && !stream.closed) {
+      await stream.writeSSE({
+        event: 'ping',
+        data: String(Date.now())
+      })
+      await stream.sleep(15000)
+    }
+  })
 })
 
 app.get('/api/me', (c) => {

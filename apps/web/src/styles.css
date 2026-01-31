@@ -150,6 +150,104 @@ h1 {
   color: inherit;
 }
 
+.settings-page {
+  display: grid;
+  gap: 20px;
+}
+
+.settings-summary h2 {
+  margin: 0 0 8px;
+}
+
+.settings-summary p {
+  margin: 0;
+  color: #4b4558;
+}
+
+.log-viewer {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.log-viewer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.log-viewer__header h3 {
+  margin: 0;
+}
+
+.log-viewer__status {
+  display: inline-flex;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.log-viewer__body {
+  max-height: 320px;
+  overflow: auto;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 12px;
+}
+
+.log-viewer__body ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+  font-size: 0.85rem;
+}
+
+.log-viewer__empty {
+  margin: 0;
+  color: #cbd5f5;
+}
+
+.log-line {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 8px;
+}
+
+.log-line__time {
+  color: #94a3b8;
+}
+
+.log-line__level {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: #38bdf8;
+}
+
+.log-line--error .log-line__level {
+  color: #f87171;
+}
+
+.log-line--warn .log-line__level {
+  color: #fbbf24;
+}
+
+.log-line--info .log-line__level {
+  color: #4ade80;
+}
+
+.log-viewer--disabled {
+  opacity: 0.7;
+}
+
 .app-content-placeholder h2 {
   margin: 0 0 8px;
 }

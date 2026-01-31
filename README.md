@@ -40,6 +40,12 @@ Create a `.env` file in the repo root (same level as `package.json`). Use `.env.
 - `SESSION_TTL_MS` (number)
   - Session cookie time-to-live in milliseconds.
   - Default: `604800000` (7 days).
+- `ENABLE_LOG_VIEWER` (`true`/`false`)
+  - Enables the log viewer SSE endpoint and UI panel.
+  - Default: `false`.
+- `LOG_BUFFER_SIZE` (number)
+  - Maximum number of log lines kept in memory for the viewer.
+  - Default: `500`.
 
 ### SMTP (SES or any SMTP provider)
 
