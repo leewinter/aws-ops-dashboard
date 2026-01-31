@@ -128,7 +128,7 @@ h1 {
 }
 
 .app-logo img {
-  max-height: 72px;
+  max-height: 102px;
   max-width: 100%;
   object-fit: contain;
 }
