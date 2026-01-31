@@ -8,6 +8,7 @@ import { useAuth } from './hooks/useAuth'
 import { useTheme } from './hooks/useTheme'
 import OverviewPage from './pages/OverviewPage'
 import SettingsPage from './pages/SettingsPage'
+import DynamicPage from './pages/DynamicPage'
 
 export default function App() {
   const {
@@ -37,6 +38,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<OverviewPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/page/:pageId" element={<DynamicPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AppShell>

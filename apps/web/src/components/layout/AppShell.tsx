@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
-import { HomeOutlined, SettingOutlined } from '@ant-design/icons'
 import { Layout, theme } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import AppSidebar from './AppSidebar'
 import { useLayout } from '../../hooks/useLayout'
 import type { ThemeKey } from '../../hooks/useTheme'
+import { useCustomPages } from '../../hooks/useCustomPages'
+import { getMenuIcon } from '../../lib/menuIcons'
 
 const { Header, Sider, Content } = Layout
 
@@ -32,19 +33,33 @@ export default function AppShell({
   } = theme.useToken()
   const navigate = useNavigate()
   const location = useLocation()
+  const { pages, order } = useCustomPages()
 
-  const menuItems = [
-    {
-      key: '/',
-      icon: <HomeOutlined />,
-      label: 'Overview'
-    },
-    {
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: 'Settings'
-    }
-  ]
+  const menuItems = order
+    .map((id) => {
+      if (id === 'overview') {
+        return {
+          key: '/',
+          icon: getMenuIcon('home'),
+          label: 'Overview'
+        }
+      }
+      if (id === 'settings') {
+        return {
+          key: '/settings',
+          icon: getMenuIcon('settings'),
+          label: 'Settings'
+        }
+      }
+      const page = pages.find((item) => item.id === id)
+      if (!page) return null
+      return {
+        key: `/page/${page.id}`,
+        icon: getMenuIcon(page.icon),
+        label: page.name
+      }
+    })
+    .filter(Boolean)
 
   return (
     <Layout className="app-layout">

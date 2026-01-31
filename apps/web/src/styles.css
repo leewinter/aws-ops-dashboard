@@ -164,6 +164,59 @@ h1 {
   color: #4b4558;
 }
 
+.settings-card {
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.settings-card__header h3 {
+  margin: 0 0 6px;
+}
+
+.settings-card__header p {
+  margin: 0;
+  color: #4b4558;
+}
+
+.settings-card__controls {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.settings-card__list {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.settings-card__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.settings-card__item-actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.settings-card__item-name {
+  font-weight: 600;
+}
+
+.icon-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .widget-grid {
   display: grid;
   gap: 20px;

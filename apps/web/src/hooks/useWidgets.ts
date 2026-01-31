@@ -19,6 +19,7 @@ export type Widget =
       type: 'log'
       title: string
       createdAt: number
+      pageId: string
       config: LogViewerWidgetConfig
     }
   | {
@@ -26,6 +27,7 @@ export type Widget =
       type: 'cloudwatch'
       title: string
       createdAt: number
+      pageId: string
       config: CloudWatchWidgetConfig
     }
 
@@ -36,7 +38,11 @@ function loadWidgets(): Widget[] {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw) as Widget[]
-    return Array.isArray(parsed) ? parsed : []
+    if (!Array.isArray(parsed)) return []
+    return parsed.map((item) => ({
+      ...item,
+      pageId: item.pageId ?? 'overview'
+    }))
   } catch {
     return []
   }
