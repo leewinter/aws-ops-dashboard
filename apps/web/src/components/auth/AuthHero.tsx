@@ -7,8 +7,7 @@ type Props = {
 export default function AuthHero({ children }: Props) {
   return (
     <header className="hero">
-      <p className="eyebrow">Login</p>
-      <h1>Passwordless sign in</h1>
+      <h1>Sign in</h1>
       <p className="lede">
         Enter your email to receive a one-time link. In dev, check your server
         logs for the magic link unless SMTP is configured.
