@@ -188,7 +188,7 @@ export default function CloudWatchViewer({
             {events.map((entry, index) => (
               <li key={entry.eventId ?? index} className="log-line log-line--info">
                 <span className="log-line__time">
-                  {entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : '--:--'}
+                  {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '--:--'}
                 </span>
                 <span className="log-line__level">
                   {entry.logStreamName ? entry.logStreamName.split('/').pop() : 'log'}

@@ -120,7 +120,7 @@ export default function LogViewer({
             {filteredLogs.map((entry) => (
               <li key={entry.id} className={`log-line log-line--${entry.level}`}>
                 <span className="log-line__time">
-                  {new Date(entry.ts).toLocaleTimeString()}
+                  {new Date(entry.ts).toLocaleString()}
                 </span>
                 <span className="log-line__level">{entry.level}</span>
                 <span className="log-line__message">{entry.message}</span>
