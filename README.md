@@ -85,6 +85,20 @@ If SMTP is not configured, the magic link is logged to the API console.
   - Optional static credentials. If not set, the app uses the default AWS SDK
     credential chain (IAM role, ECS task role, etc.).
 
+### Optional (SQS viewer)
+
+- `ENABLE_SQS_VIEWER` (`true`/`false`)
+  - Enables SQS viewer API and UI panel.
+  - Default: `false`.
+- `SQS_QUEUE_URL` (string)
+  - Default queue URL for the SQS viewer.
+
+## Feature docs
+
+- Log viewer: `docs/FEATURE_LOG_VIEWER.md`
+- CloudWatch logs: `docs/FEATURE_CLOUDWATCH.md`
+- SQS viewer: `docs/FEATURE_SQS.md`
+
 ## CloudWatch Logs viewer
 
 Enable the viewer with:

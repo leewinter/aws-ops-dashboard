@@ -30,6 +30,18 @@ export type Widget =
       pageId: string
       config: CloudWatchWidgetConfig
     }
+  | {
+      id: string
+      type: 'sqs'
+      title: string
+      createdAt: number
+      pageId: string
+      config: {
+        queueUrl: string
+        maxNumber: number
+        autoPoll: boolean
+      }
+    }
 
 const STORAGE_KEY = 'hono-widgets'
 
@@ -41,7 +53,7 @@ function loadWidgets(): Widget[] {
     if (!Array.isArray(parsed)) return []
     return parsed.map((item) => ({
       ...item,
-      pageId: item.pageId ?? 'overview'
+      pageId: (item as { pageId?: string }).pageId ?? 'overview'
     }))
   } catch {
     return []

@@ -1,6 +1,7 @@
 import { Button } from 'antd'
 import LogViewer from '../components/logs/LogViewer'
 import CloudWatchViewer from '../components/logs/CloudWatchViewer'
+import SqsViewer from '../components/logs/SqsViewer'
 import { useWidgets } from '../hooks/useWidgets'
 
 export default function OverviewPage() {
@@ -31,13 +32,19 @@ export default function OverviewPage() {
               initialLevels={widget.config.levels}
               initialQuery={widget.config.query}
             />
-          ) : (
+          ) : widget.type === 'cloudwatch' ? (
             <CloudWatchViewer
               initialLogGroup={widget.config.logGroup}
               initialLogStreams={widget.config.logStreams}
               initialFilterPattern={widget.config.filterPattern}
               initialRange={widget.config.range}
               autoFetch
+            />
+          ) : (
+            <SqsViewer
+              initialQueueUrl={widget.config.queueUrl}
+              initialMaxNumber={widget.config.maxNumber}
+              initialAutoPoll={widget.config.autoPoll}
             />
           )}
         </div>

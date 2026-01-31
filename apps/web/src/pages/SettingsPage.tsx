@@ -1,6 +1,7 @@
 import { Button, Input, Modal, Select } from 'antd'
 import LogViewer from '../components/logs/LogViewer'
 import CloudWatchViewer from '../components/logs/CloudWatchViewer'
+import SqsViewer from '../components/logs/SqsViewer'
 import { useCustomPages } from '../hooks/useCustomPages'
 import { useWidgets } from '../hooks/useWidgets'
 import { menuIconOptions } from '../lib/menuIcons'
@@ -23,6 +24,14 @@ export default function SettingsPage() {
           logStreams: string
           filterPattern: string
           range: '15m' | '1h' | '24h' | '7d' | '30d'
+        }
+      }
+    | {
+        type: 'sqs'
+        config: {
+          queueUrl: string
+          maxNumber: number
+          autoPoll: boolean
         }
       }
     | null
@@ -153,6 +162,14 @@ export default function SettingsPage() {
           })()
         }
       />
+      <SqsViewer
+        onSaveWidget={(config) =>
+          (() => {
+            setPendingSave({ type: 'sqs', config })
+            setIsDestinationOpen(true)
+          })()
+        }
+      />
       <Modal
         title="Choose widget destination"
         open={isDestinationOpen}
@@ -169,10 +186,17 @@ export default function SettingsPage() {
               pageId: targetPage,
               config: pendingSave.config
             })
-          } else {
+          } else if (pendingSave.type === 'cloudwatch') {
             addWidget({
               type: 'cloudwatch',
               title: `CloudWatch: ${pendingSave.config.logGroup || 'logs'}`,
+              pageId: targetPage,
+              config: pendingSave.config
+            })
+          } else {
+            addWidget({
+              type: 'sqs',
+              title: `SQS: ${pendingSave.config.queueUrl.split('/').pop() ?? 'queue'}`,
               pageId: targetPage,
               config: pendingSave.config
             })

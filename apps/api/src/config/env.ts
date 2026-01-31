@@ -38,5 +38,7 @@ export const env = {
   awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   awsSessionToken: process.env.AWS_SESSION_TOKEN,
   enableCloudwatchViewer: process.env.ENABLE_CLOUDWATCH_VIEWER === 'true',
-  cloudwatchDefaultLogGroup: process.env.CLOUDWATCH_LOG_GROUP
+  cloudwatchDefaultLogGroup: process.env.CLOUDWATCH_LOG_GROUP,
+  enableSqsViewer: process.env.ENABLE_SQS_VIEWER === 'true',
+  sqsDefaultQueueUrl: process.env.SQS_QUEUE_URL
 }
