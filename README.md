@@ -1,4 +1,4 @@
-﻿# Hono Magic Link
+﻿# AWS Ops Dashboard
 
 Monorepo with a React (Vite) frontend and a Hono API. In dev they run on separate ports; in Docker the API serves both the API and the built React app on a single port.
 
@@ -153,8 +153,8 @@ Example IAM policy for read-only access:
 ## Docker
 
 ```bash
-docker build -t hono-magic-link .
-docker run -p 3000:3000 hono-magic-link
+docker build -t aws-ops-dashboard .
+docker run -p 3000:3000 aws-ops-dashboard
 ```
 
 Open http://localhost:3000

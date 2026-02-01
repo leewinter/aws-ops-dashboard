@@ -1,5 +1,6 @@
 {
-  "name": "hono-magic-link",
+  "name": "aws-ops-dashboard",
+  "version": "0.1.0",
   "private": true,
   "workspaces": [
     "apps/*"
