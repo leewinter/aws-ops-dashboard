@@ -6,6 +6,8 @@ type Props = {
   initialQueueUrl?: string
   initialMaxNumber?: number
   initialAutoPoll?: boolean
+  saveLabel?: string
+  requireDirty?: boolean
   onSaveWidget?: (config: {
     queueUrl: string
     maxNumber: number
@@ -17,6 +19,8 @@ export default function SqsViewer({
   initialQueueUrl,
   initialMaxNumber = 5,
   initialAutoPoll = false,
+  saveLabel = 'Add widget',
+  requireDirty = true,
   onSaveWidget
 }: Props) {
   const {
@@ -38,6 +42,11 @@ export default function SqsViewer({
   const [maxNumber, setMaxNumber] = useState(initialMaxNumber)
   const [autoPoll, setAutoPoll] = useState(initialAutoPoll)
   const intervalRef = useRef<number | null>(null)
+  const [baseline, setBaseline] = useState({
+    queueUrl: initialQueueUrl ?? defaultQueueUrl ?? '',
+    maxNumber: initialMaxNumber,
+    autoPoll: initialAutoPoll
+  })
 
   const uniqueMessages = useMemo(() => {
     const seen = new Set<string>()
@@ -60,6 +69,20 @@ export default function SqsViewer({
       setQueueUrl(defaultQueueUrl)
     }
   }, [defaultQueueUrl, queueUrl])
+
+  useEffect(() => {
+    if (defaultQueueUrl && baseline.queueUrl === '') {
+      setBaseline((prev) => ({ ...prev, queueUrl: defaultQueueUrl }))
+    }
+  }, [baseline.queueUrl, defaultQueueUrl])
+
+  const isDirty = useMemo(() => {
+    return (
+      baseline.queueUrl !== queueUrl ||
+      baseline.maxNumber !== maxNumber ||
+      baseline.autoPoll !== autoPoll
+    )
+  }, [autoPoll, baseline, maxNumber, queueUrl])
 
   useEffect(() => {
     if (!autoPoll || !queueUrl) return
@@ -96,15 +119,18 @@ export default function SqsViewer({
             <Button
               size="small"
               onClick={() =>
-                onSaveWidget({
-                  queueUrl,
-                  maxNumber,
-                  autoPoll
-                })
+                (() => {
+                  onSaveWidget({
+                    queueUrl,
+                    maxNumber,
+                    autoPoll
+                  })
+                  setBaseline({ queueUrl, maxNumber, autoPoll })
+                })()
               }
-              disabled={!queueUrl}
+              disabled={!queueUrl || (requireDirty ? !isDirty : false)}
             >
-              Add widget
+              {saveLabel}
             </Button>
           )}
           <Button

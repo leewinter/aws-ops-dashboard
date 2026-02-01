@@ -24,6 +24,7 @@ export default function SettingsPage() {
           logStreams: string
           filterPattern: string
           range: '15m' | '1h' | '24h' | '7d' | '30d'
+          showStream: boolean
         }
       }
     | {
@@ -146,6 +147,7 @@ export default function SettingsPage() {
       </div>
       <LogViewer
         showSave
+        requireDirty={false}
         onSaveWidget={(config) =>
           (() => {
             setPendingSave({ type: 'log', config })
@@ -155,6 +157,7 @@ export default function SettingsPage() {
       />
       <CloudWatchViewer
         showSave
+        requireDirty={false}
         onSaveWidget={(config) =>
           (() => {
             setPendingSave({ type: 'cloudwatch', config })
@@ -163,6 +166,7 @@ export default function SettingsPage() {
         }
       />
       <SqsViewer
+        requireDirty={false}
         onSaveWidget={(config) =>
           (() => {
             setPendingSave({ type: 'sqs', config })

@@ -25,4 +25,4 @@ COPY --from=builder /app/apps/web/dist /app/apps/web/dist
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["node", "apps/api/dist/index.js"]
+CMD ["node", "apps/api/dist/server.js"]

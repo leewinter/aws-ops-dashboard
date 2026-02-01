@@ -4,6 +4,8 @@ import { useLogStream } from '../../hooks/useLogStream'
 
 type Props = {
   showSave?: boolean
+  saveLabel?: string
+  requireDirty?: boolean
   initialTailEnabled?: boolean
   initialLevels?: string[]
   initialQuery?: string
@@ -16,6 +18,8 @@ type Props = {
 
 export default function LogViewer({
   showSave,
+  saveLabel = 'Add widget',
+  requireDirty = true,
   initialTailEnabled = true,
   initialLevels = ['info', 'warn', 'error', 'debug'],
   initialQuery = '',
@@ -27,6 +31,11 @@ export default function LogViewer({
   const [tailEnabled, setTailEnabled] = useState(initialTailEnabled)
   const [levels, setLevels] = useState<string[]>(initialLevels)
   const [query, setQuery] = useState(initialQuery)
+  const [baseline, setBaseline] = useState({
+    tailEnabled: initialTailEnabled,
+    levels: initialLevels,
+    query: initialQuery
+  })
 
   useEffect(() => {
     if (tailEnabled) {
@@ -53,6 +62,15 @@ export default function LogViewer({
       return entry.message.toLowerCase().includes(normalized)
     })
   }, [levels, logs, query])
+
+  const isDirty = useMemo(() => {
+    if (baseline.tailEnabled !== tailEnabled) return true
+    if (baseline.query !== query) return true
+    if (baseline.levels.length !== levels.length) return true
+    const a = [...baseline.levels].sort().join('|')
+    const b = [...levels].sort().join('|')
+    return a !== b
+  }, [baseline, levels, query, tailEnabled])
 
   if (!enabled) {
     return (
@@ -96,15 +114,19 @@ export default function LogViewer({
           {showSave && onSaveWidget && (
             <Button
               size="small"
+              disabled={requireDirty ? !isDirty : false}
               onClick={() =>
-                onSaveWidget({
-                  tailEnabled,
-                  levels,
-                  query
-                })
+                (() => {
+                  onSaveWidget({
+                    tailEnabled,
+                    levels,
+                    query
+                  })
+                  setBaseline({ tailEnabled, levels, query })
+                })()
               }
             >
-              Add widget
+              {saveLabel}
             </Button>
           )}
           <Button size="small" onClick={clearLogs}>

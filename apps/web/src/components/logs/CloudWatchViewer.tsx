@@ -4,25 +4,32 @@ import { useCloudWatchLogs } from '../../hooks/useCloudWatchLogs'
 
 type Props = {
   showSave?: boolean
+  saveLabel?: string
+  requireDirty?: boolean
   initialLogGroup?: string
   initialLogStreams?: string
   initialFilterPattern?: string
   initialRange?: '15m' | '1h' | '24h' | '7d' | '30d'
+  initialShowStream?: boolean
   autoFetch?: boolean
   onSaveWidget?: (config: {
     logGroup: string
     logStreams: string
     filterPattern: string
     range: '15m' | '1h' | '24h' | '7d' | '30d'
+    showStream: boolean
   }) => void
 }
 
 export default function CloudWatchViewer({
   showSave,
+  saveLabel = 'Add widget',
+  requireDirty = true,
   initialLogGroup,
   initialLogStreams = '',
   initialFilterPattern = '',
   initialRange = '1h',
+  initialShowStream = true,
   autoFetch,
   onSaveWidget
 }: Props) {
@@ -46,7 +53,14 @@ export default function CloudWatchViewer({
   const [range, setRange] = useState<'15m' | '1h' | '24h' | '7d' | '30d'>(
     initialRange
   )
-  const [showStream, setShowStream] = useState(true)
+  const [showStream, setShowStream] = useState(initialShowStream)
+  const [baseline, setBaseline] = useState({
+    logGroup: initialLogGroup ?? defaultLogGroup ?? '',
+    logStreams: initialLogStreams,
+    filterPattern: initialFilterPattern,
+    range: initialRange,
+    showStream: initialShowStream
+  })
 
   const streamList = useMemo(
     () =>
@@ -77,6 +91,23 @@ export default function CloudWatchViewer({
       setLogGroup(defaultLogGroup)
     }
   }, [defaultLogGroup, logGroup])
+
+  useEffect(() => {
+    if (defaultLogGroup && baseline.logGroup === '') {
+      setBaseline((prev) => ({ ...prev, logGroup: defaultLogGroup }))
+    }
+  }, [baseline.logGroup, defaultLogGroup])
+
+
+  const isDirty = useMemo(() => {
+    return (
+      baseline.logGroup !== logGroup ||
+      baseline.logStreams !== logStreams ||
+      baseline.filterPattern !== filterPattern ||
+      baseline.range !== range ||
+      baseline.showStream !== showStream
+    )
+  }, [baseline, filterPattern, logGroup, logStreams, range, showStream])
 
   useEffect(() => {
     if (!autoFetch) return
@@ -110,16 +141,26 @@ export default function CloudWatchViewer({
             <Button
               size="small"
               onClick={() =>
-                onSaveWidget({
-                  logGroup,
-                  logStreams,
-                  filterPattern,
-                  range
-                })
+                (() => {
+                  onSaveWidget({
+                    logGroup,
+                    logStreams,
+                    filterPattern,
+                    range,
+                    showStream
+                  })
+                  setBaseline({
+                    logGroup,
+                    logStreams,
+                    filterPattern,
+                    range,
+                    showStream
+                  })
+                })()
               }
-              disabled={!logGroup}
+              disabled={!logGroup || (requireDirty ? !isDirty : false)}
             >
-              Add widget
+              {saveLabel}
             </Button>
           )}
           <Button

@@ -10,7 +10,7 @@ import WidgetCard from '../components/widgets/WidgetCard'
 export default function DynamicPage() {
   const { pageId } = useParams()
   const { pages } = useCustomPages()
-  const { widgets, removeWidget } = useWidgets()
+  const { widgets, removeWidget, updateWidget } = useWidgets()
 
   const page = useMemo(() => pages.find((item) => item.id === pageId), [pages, pageId])
   const pageWidgets = useMemo(
@@ -44,6 +44,14 @@ export default function DynamicPage() {
               initialTailEnabled={widget.config.tailEnabled}
               initialLevels={widget.config.levels}
               initialQuery={widget.config.query}
+              showSave
+              saveLabel="Save changes"
+              onSaveWidget={(config) =>
+                updateWidget(widget.id, (current) => ({
+                  ...current,
+                  config
+                }))
+              }
             />
           ) : widget.type === 'cloudwatch' ? (
             <CloudWatchViewer
@@ -51,13 +59,29 @@ export default function DynamicPage() {
               initialLogStreams={widget.config.logStreams}
               initialFilterPattern={widget.config.filterPattern}
               initialRange={widget.config.range}
+              initialShowStream={widget.config.showStream}
               autoFetch
+              showSave
+              saveLabel="Save changes"
+              onSaveWidget={(config) =>
+                updateWidget(widget.id, (current) => ({
+                  ...current,
+                  config
+                }))
+              }
             />
           ) : (
             <SqsViewer
               initialQueueUrl={widget.config.queueUrl}
               initialMaxNumber={widget.config.maxNumber}
               initialAutoPoll={widget.config.autoPoll}
+              saveLabel="Save changes"
+              onSaveWidget={(config) =>
+                updateWidget(widget.id, (current) => ({
+                  ...current,
+                  config
+                }))
+              }
             />
           )}
         </WidgetCard>

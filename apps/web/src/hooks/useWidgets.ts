@@ -5,6 +5,7 @@ export type CloudWatchWidgetConfig = {
   logStreams: string
   filterPattern: string
   range: '15m' | '1h' | '24h' | '7d' | '30d'
+  showStream: boolean
 }
 
 export type LogViewerWidgetConfig = {
@@ -47,10 +48,21 @@ function loadWidgets(): Widget[] {
     if (!raw) return []
     const parsed = JSON.parse(raw) as Widget[]
     if (!Array.isArray(parsed)) return []
-    return parsed.map((item) => ({
-      ...item,
-      pageId: (item as { pageId?: string }).pageId ?? 'overview'
-    }))
+    return parsed.map((item) => {
+      const pageId = (item as { pageId?: string }).pageId ?? 'overview'
+      if ((item as Widget).type === 'cloudwatch') {
+        const cloud = item as Widget & { config: CloudWatchWidgetConfig }
+        return {
+          ...cloud,
+          pageId,
+          config: {
+            ...cloud.config,
+            showStream: cloud.config.showStream ?? true
+          }
+        }
+      }
+      return { ...item, pageId }
+    })
   } catch {
     return []
   }
@@ -80,6 +92,17 @@ export function useWidgets() {
       })
     }, [])
 
+  const updateWidget = useCallback(
+    (id: string, updater: (current: Widget) => Widget) => {
+      setWidgets((prev) => {
+        const updated = prev.map((widget) => (widget.id === id ? updater(widget) : widget))
+        saveWidgets(updated)
+        return updated
+      })
+    },
+    []
+  )
+
   const removeWidget = useCallback((id: string) => {
     setWidgets((prev) => {
       const updated = prev.filter((w) => w.id !== id)
@@ -92,9 +115,10 @@ export function useWidgets() {
     () => ({
       widgets,
       addWidget,
+      updateWidget,
       removeWidget
     }),
-    [widgets, addWidget, removeWidget]
+    [widgets, addWidget, updateWidget, removeWidget]
   )
 
   return value
