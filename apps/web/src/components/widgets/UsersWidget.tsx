@@ -1,4 +1,4 @@
-import { Button, Switch } from 'antd'
+import { Button, Input, Switch } from 'antd'
 import { useMemo, useState } from 'react'
 import { useUserStatus } from '../../hooks/useUserStatus'
 
@@ -17,9 +17,12 @@ export default function UsersWidget({
   requireDirty = true,
   onSaveWidget
 }: Props) {
-  const { users, isLoading, error } = useUserStatus()
+  const { users, isLoading, error, refresh } = useUserStatus()
   const [showActiveOnly, setShowActiveOnly] = useState(initialShowActiveOnly)
   const [baseline, setBaseline] = useState({ showActiveOnly: initialShowActiveOnly })
+  const [newEmail, setNewEmail] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const isDirty = baseline.showActiveOnly !== showActiveOnly
 
@@ -58,6 +61,44 @@ export default function UsersWidget({
         </div>
       </div>
 
+      <div className="cloudwatch-controls">
+        <Input
+          placeholder="Add allowed email"
+          value={newEmail}
+          onChange={(event) => setNewEmail(event.target.value)}
+        />
+        <Button
+          size="small"
+          onClick={async () => {
+            setIsSaving(true)
+            setSaveError(null)
+            try {
+              const res = await fetch('/api/users/allowed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: newEmail })
+              })
+              if (!res.ok) {
+                const payload = await res.json().catch(() => null)
+                setSaveError(payload?.message ?? 'Failed to add user.')
+                return
+              }
+              setNewEmail('')
+              await refresh()
+            } catch {
+              setSaveError('Failed to add user.')
+            } finally {
+              setIsSaving(false)
+            }
+          }}
+          disabled={!newEmail || isSaving}
+        >
+          Add
+        </Button>
+      </div>
+
+      {saveError && <p className="log-viewer__empty">{saveError}</p>}
+
       {error && <p className="log-viewer__empty">{error}</p>}
 
       <div className="log-viewer__body">
@@ -75,7 +116,36 @@ export default function UsersWidget({
                 <span className="log-line__level">
                   {user.activeSession ? 'Active' : 'Idle'}
                 </span>
-                <span className="log-line__message">{user.email}</span>
+                <span className="log-line__message">
+                  {user.email}
+                  {user.source === 'temp' && (
+                    <Button
+                      size="small"
+                      onClick={async () => {
+                        setIsSaving(true)
+                        setSaveError(null)
+                        try {
+                          const res = await fetch(
+                            `/api/users/allowed?email=${encodeURIComponent(user.email)}`,
+                            { method: 'DELETE' }
+                          )
+                          if (!res.ok) {
+                            const payload = await res.json().catch(() => null)
+                            setSaveError(payload?.message ?? 'Failed to remove user.')
+                            return
+                          }
+                          await refresh()
+                        } catch {
+                          setSaveError('Failed to remove user.')
+                        } finally {
+                          setIsSaving(false)
+                        }
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </span>
               </li>
             ))}
           </ul>

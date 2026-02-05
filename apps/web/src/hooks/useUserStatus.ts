@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export type UserStatus = {
   email: string
   activeSession: boolean
   lastLogin: number | null
+  source?: 'env' | 'temp' | 'session'
+  addedAt?: number | null
 }
 
 export function useUserStatus() {
@@ -11,10 +13,10 @@ export function useUserStatus() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     setIsLoading(true)
     setError(null)
-    fetch('/api/users/status')
+    return fetch('/api/users/status')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data?.ok) {
@@ -27,5 +29,9 @@ export function useUserStatus() {
       .finally(() => setIsLoading(false))
   }, [])
 
-  return { users, isLoading, error }
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  return { users, isLoading, error, refresh }
 }

@@ -15,6 +15,7 @@ type Session = {
 const tokens = new Map<string, MagicToken>()
 const sessions = new Map<string, Session>()
 const lastLogin = new Map<string, number>()
+const tempAllowed = new Map<string, number>()
 
 function randomToken(size = 32) {
   return crypto.randomBytes(size).toString('hex')
@@ -29,8 +30,9 @@ export function isEmail(value: string) {
 }
 
 export function isAllowedEmail(email: string) {
-  if (env.allowedEmails.length === 0) return true
-  return env.allowedEmails.includes(email.toLowerCase())
+  if (env.allowedEmails.length === 0 && tempAllowed.size === 0) return true
+  const normalized = email.toLowerCase()
+  return env.allowedEmails.includes(normalized) || tempAllowed.has(normalized)
 }
 
 export function pruneExpired() {
@@ -88,14 +90,50 @@ export function getUserStatus() {
     activeByEmail.add(session.email)
   }
 
-  const allowed =
-    env.allowedEmails.length > 0
-      ? env.allowedEmails
-      : Array.from(activeByEmail.values())
+  const allowed = getAllowedUsers()
+  const allowedEmails =
+    allowed.length > 0 ? allowed.map((user) => user.email) : Array.from(activeByEmail.values())
 
-  return allowed.map((email) => ({
+  return allowedEmails.map((email) => {
+    const allowedMeta = allowed.find((user) => user.email === email)
+    return {
+      email,
+      activeSession: activeByEmail.has(email),
+      lastLogin: lastLogin.get(email) ?? null,
+      source: allowedMeta?.source ?? 'session',
+      addedAt: allowedMeta?.addedAt ?? null
+    }
+  })
+}
+
+export function addTempAllowed(email: string) {
+  const normalized = email.toLowerCase()
+  if (env.allowedEmails.includes(normalized)) {
+    return { ok: false, reason: 'exists' as const }
+  }
+  tempAllowed.set(normalized, Date.now())
+  return { ok: true }
+}
+
+export function removeTempAllowed(email: string) {
+  const normalized = email.toLowerCase()
+  if (env.allowedEmails.includes(normalized)) {
+    return { ok: false, reason: 'managed' as const }
+  }
+  tempAllowed.delete(normalized)
+  return { ok: true }
+}
+
+export function getAllowedUsers() {
+  const envUsers = env.allowedEmails.map((email) => ({
     email,
-    activeSession: activeByEmail.has(email),
-    lastLogin: lastLogin.get(email) ?? null
+    source: 'env' as const,
+    addedAt: null as number | null
   }))
+  const tempUsers = Array.from(tempAllowed.entries()).map(([email, addedAt]) => ({
+    email,
+    source: 'temp' as const,
+    addedAt
+  }))
+  return [...envUsers, ...tempUsers]
 }
