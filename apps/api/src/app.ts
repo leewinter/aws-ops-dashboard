@@ -10,6 +10,7 @@ import { registerCloudWatchRoutes } from './routes/cloudwatch'
 import { registerHealthRoutes } from './routes/health'
 import { registerLogRoutes } from './routes/logs'
 import { registerSqsRoutes } from './routes/sqs'
+import { registerUserRoutes } from './routes/users'
 
 export function createApp() {
   const app = new Hono()
@@ -44,6 +45,7 @@ export function createApp() {
   registerLogRoutes(app)
   registerCloudWatchRoutes(app)
   registerSqsRoutes(app)
+  registerUserRoutes(app)
   registerAuthRoutes(app)
 
   if (env.nodeEnv === 'production') {

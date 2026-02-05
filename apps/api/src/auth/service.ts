@@ -9,10 +9,12 @@ type MagicToken = {
 type Session = {
   email: string
   expiresAt: number
+  createdAt: number
 }
 
 const tokens = new Map<string, MagicToken>()
 const sessions = new Map<string, Session>()
+const lastLogin = new Map<string, number>()
 
 function randomToken(size = 32) {
   return crypto.randomBytes(size).toString('hex')
@@ -61,10 +63,13 @@ export function consumeMagicToken(token: string) {
 
 export function createSession(email: string) {
   const sessionId = randomToken(24)
+  const createdAt = Date.now()
   sessions.set(sessionId, {
     email,
-    expiresAt: Date.now() + env.sessionTtlMs
+    expiresAt: createdAt + env.sessionTtlMs,
+    createdAt
   })
+  lastLogin.set(email, createdAt)
   return sessionId
 }
 
@@ -74,4 +79,23 @@ export function getSession(sessionId: string) {
 
 export function deleteSession(sessionId: string) {
   sessions.delete(sessionId)
+}
+
+export function getUserStatus() {
+  pruneExpired()
+  const activeByEmail = new Set<string>()
+  for (const session of sessions.values()) {
+    activeByEmail.add(session.email)
+  }
+
+  const allowed =
+    env.allowedEmails.length > 0
+      ? env.allowedEmails
+      : Array.from(activeByEmail.values())
+
+  return allowed.map((email) => ({
+    email,
+    activeSession: activeByEmail.has(email),
+    lastLogin: lastLogin.get(email) ?? null
+  }))
 }

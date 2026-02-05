@@ -14,31 +14,33 @@ export type LogViewerWidgetConfig = {
   query: string
 }
 
-export type WidgetBase = {
+export type WidgetType = 'log' | 'cloudwatch' | 'sqs' | 'users'
+
+export type WidgetConfigMap = {
+  log: LogViewerWidgetConfig
+  cloudwatch: CloudWatchWidgetConfig
+  sqs: {
+    queueUrl: string
+    maxNumber: number
+    autoPoll: boolean
+  }
+  users: {
+    showActiveOnly: boolean
+  }
+}
+
+export type WidgetBase<T extends WidgetType = WidgetType> = {
   id: string
-  type: 'log' | 'cloudwatch' | 'sqs'
+  type: T
   title: string
   createdAt: number
   pageId: string
+  config: WidgetConfigMap[T]
 }
 
-export type Widget =
-  | (WidgetBase & {
-      type: 'log'
-      config: LogViewerWidgetConfig
-    })
-  | (WidgetBase & {
-      type: 'cloudwatch'
-      config: CloudWatchWidgetConfig
-    })
-  | (WidgetBase & {
-      type: 'sqs'
-      config: {
-        queueUrl: string
-        maxNumber: number
-        autoPoll: boolean
-      }
-    })
+export type Widget = {
+  [K in WidgetType]: WidgetBase<K>
+}[WidgetType]
 
 const STORAGE_KEY = 'hono-widgets'
 
@@ -72,7 +74,19 @@ function saveWidgets(widgets: Widget[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets))
 }
 
-export function useWidgets() {
+type UseWidgetsResult = {
+  widgets: Widget[]
+  addWidget: (widget: Omit<Widget, 'id' | 'createdAt'>) => void
+  updateWidget: (id: string, updater: (current: Widget) => Widget) => void
+  updateWidgetConfig: <T extends WidgetType>(
+    id: string,
+    type: T,
+    config: WidgetConfigMap[T]
+  ) => void
+  removeWidget: (id: string) => void
+}
+
+export function useWidgets(): UseWidgetsResult {
   const [widgets, setWidgets] = useState<Widget[]>([])
 
   useEffect(() => {
@@ -103,6 +117,23 @@ export function useWidgets() {
     []
   )
 
+  const updateWidgetConfig = useCallback(
+    <T extends WidgetType>(id: string, type: T, config: WidgetConfigMap[T]) => {
+      setWidgets((prev) => {
+        const updated = prev.map((widget) => {
+          if (widget.id !== id || widget.type !== type) return widget
+          return {
+            ...widget,
+            config
+          } as Widget
+        })
+        saveWidgets(updated)
+        return updated
+      })
+    },
+    []
+  )
+
   const removeWidget = useCallback((id: string) => {
     setWidgets((prev) => {
       const updated = prev.filter((w) => w.id !== id)
@@ -116,9 +147,10 @@ export function useWidgets() {
       widgets,
       addWidget,
       updateWidget,
+      updateWidgetConfig,
       removeWidget
     }),
-    [widgets, addWidget, updateWidget, removeWidget]
+    [widgets, addWidget, updateWidget, updateWidgetConfig, removeWidget]
   )
 
   return value

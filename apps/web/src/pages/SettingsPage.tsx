@@ -2,6 +2,7 @@ import { Button, Input, Modal, Select } from 'antd'
 import LogViewer from '../components/logs/LogViewer'
 import CloudWatchViewer from '../components/logs/CloudWatchViewer'
 import SqsViewer from '../components/logs/SqsViewer'
+import UsersWidget from '../components/widgets/UsersWidget'
 import { useCustomPages } from '../hooks/useCustomPages'
 import { useWidgets } from '../hooks/useWidgets'
 import { menuIconOptions } from '../lib/menuIcons'
@@ -33,6 +34,12 @@ export default function SettingsPage() {
           queueUrl: string
           maxNumber: number
           autoPoll: boolean
+        }
+      }
+    | {
+        type: 'users'
+        config: {
+          showActiveOnly: boolean
         }
       }
     | null
@@ -174,6 +181,16 @@ export default function SettingsPage() {
           })()
         }
       />
+      <UsersWidget
+        showSave
+        requireDirty={false}
+        onSaveWidget={(config) =>
+          (() => {
+            setPendingSave({ type: 'users', config })
+            setIsDestinationOpen(true)
+          })()
+        }
+      />
       <Modal
         title="Choose widget destination"
         open={isDestinationOpen}
@@ -197,10 +214,17 @@ export default function SettingsPage() {
               pageId: targetPage,
               config: pendingSave.config
             })
-          } else {
+          } else if (pendingSave.type === 'sqs') {
             addWidget({
               type: 'sqs',
               title: `SQS: ${pendingSave.config.queueUrl.split('/').pop() ?? 'queue'}`,
+              pageId: targetPage,
+              config: pendingSave.config
+            })
+          } else {
+            addWidget({
+              type: 'users',
+              title: 'Users',
               pageId: targetPage,
               config: pendingSave.config
             })
